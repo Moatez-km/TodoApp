@@ -22,7 +22,7 @@ class _HomeLayoutState extends State<HomeLayout> {
     DoneTasksScreen(),
     ArchivedTasksScreen(),
   ];
-
+  late Database database;
   @override
   void initState() {
     super.initState();
@@ -38,14 +38,15 @@ class _HomeLayoutState extends State<HomeLayout> {
       body: screens[currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          try {
+          insertToDatabase();
+          /*try {
             var name = await getName();
             print(name);
             throw ('some error !!!');
           } catch (error) {
             print('error ${error.toString()}');
           }
-          /*
+          
           getName().then((value) {
             print(value);
             print('taz');
@@ -79,7 +80,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   }
 
   void createDatabase() async {
-    var database = await openDatabase(
+    database = await openDatabase(
       'todo.db',
       version: 1,
       onCreate: (database, version) async {
@@ -93,5 +94,16 @@ class _HomeLayoutState extends State<HomeLayout> {
     );
   }
 
-  void insertDatabase() {}
+  Future<void> insertToDatabase() async {
+    await database.transaction((txn) async {
+      try {
+        final value = await txn.rawInsert(
+            'INSERT INTO tasks (title,date,time,status) VALUES ("First task","0011","2430","New")');
+
+        print('$value Inserted');
+      } catch (error) {
+        print('error is ${error.toString()}');
+      }
+    });
+  }
 }
